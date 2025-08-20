@@ -31,7 +31,7 @@ export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*
   }, [localPreviewUrl]);
   const hasAnyImage = Boolean(localPreviewUrl || imageUrl);
 
-  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 70): string | null {
+  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 640, quality: number = 70): string | null {
     if (!originalUrl) return null;
     try {
       const publicToken = '/storage/v1/object/public/';
@@ -111,7 +111,7 @@ export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*
             {(() => {
               const baseUrl = localPreviewUrl ?? (imageUrl as string);
               const unopt = isBlobOrDataUrl(baseUrl);
-              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 1200, 80) as string);
+              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 640, 75) as string);
               return (
                 <Image
                   fill

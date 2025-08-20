@@ -70,7 +70,7 @@ export default function SchoolInfoSettingsPage() {
     })();
   }, []);
 
-  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 1600, quality: number = 80): string | null {
+  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 78): string | null {
     if (!originalUrl) return null;
     try {
       const publicToken = '/storage/v1/object/public/';
@@ -234,7 +234,7 @@ export default function SchoolInfoSettingsPage() {
             {(() => {
               const baseUrl = previewUrl as string;
               const unopt = isBlobOrDataUrl(baseUrl);
-              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 1920, 85) as string);
+              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 1280, 80) as string);
               return (
                 <Image
                   fill

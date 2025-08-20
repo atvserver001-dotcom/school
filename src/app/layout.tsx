@@ -29,8 +29,23 @@ export default async function RootLayout({
   const token = cookieStore.get("admin_token")?.value;
   const session = token ? verifyJwt(token) : null;
 
+  const supabaseOrigin = (() => {
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      return url ? new URL(url).origin : null;
+    } catch { return null; }
+  })();
+
   return (
     <html lang="ko">
+      <head>
+        {supabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="" />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        ) : null}
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
       </body>
