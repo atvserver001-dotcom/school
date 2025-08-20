@@ -401,6 +401,15 @@ a {
   margin-top: 10px;
   display: block;
 }
+.ui-timeline-image-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  max-height: 480px;
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+  overflow: hidden;
+}
 
 @media (max-width: 900px) {
   .ui-timeline-row { grid-template-columns: 1fr 40px 1fr; }

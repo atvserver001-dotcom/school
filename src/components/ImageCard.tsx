@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 export interface ImageCardProps {
   title: string;
@@ -9,9 +10,10 @@ export interface ImageCardProps {
   accept?: string; // default: image/*
   onSelect: (file: File) => void;
   onPreview?: (url: string) => void;
+  priority?: boolean;
 }
 
-export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*', onSelect, onPreview }: ImageCardProps) {
+export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*', onSelect, onPreview, priority = false }: ImageCardProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const previewOnSelectRef = useRef<boolean>(true);
   const suppressNextPreviewRef = useRef<boolean>(false);
@@ -28,6 +30,28 @@ export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*
     };
   }, [localPreviewUrl]);
   const hasAnyImage = Boolean(localPreviewUrl || imageUrl);
+
+  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 70): string | null {
+    if (!originalUrl) return null;
+    try {
+      const publicToken = '/storage/v1/object/public/';
+      const signToken = '/storage/v1/object/sign/';
+      if (originalUrl.includes(publicToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      if (originalUrl.includes(signToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/sign/', '/storage/v1/render/image/sign/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      return originalUrl;
+    } catch {
+      return originalUrl;
+    }
+  }
+  const isBlobOrDataUrl = (url: string) => url.startsWith('blob:') || url.startsWith('data:');
 
   return (
     <div className="ui-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -83,8 +107,24 @@ export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*
         }}
       >
         {localPreviewUrl || imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={localPreviewUrl ?? (imageUrl as string)} alt={title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+          <div style={{ position: 'absolute', inset: 0 }}>
+            {(() => {
+              const baseUrl = localPreviewUrl ?? (imageUrl as string);
+              const unopt = isBlobOrDataUrl(baseUrl);
+              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 1200, 80) as string);
+              return (
+                <Image
+                  fill
+                  src={src}
+                  alt={title}
+                  unoptimized={unopt}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1120px) 50vw, 33vw"
+                  style={{ objectFit: 'contain' }}
+                  priority={priority}
+                />
+              );
+            })()}
+          </div>
         ) : (
           <div
             style={{

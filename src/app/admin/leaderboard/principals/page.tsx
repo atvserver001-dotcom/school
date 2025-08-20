@@ -174,12 +174,13 @@ export default function PrincipalsSettingsPage() {
             gap: '16px',
             marginTop: '16px' 
           }}>
-            {principals.map((principal) => (
+            {principals.map((principal, index) => (
               <div key={principal.id}>
                 <PersonCard
                   year={principal.year.toString()}
                   name={principal.name}
                   imageUrl={principal.image_url}
+                  priority={index === 0}
                 />
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8 }}>
                   <button

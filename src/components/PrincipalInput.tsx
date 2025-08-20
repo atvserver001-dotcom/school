@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import TextEditor from './TextEditor';
 import ImageUploader from './ImageUploader';
 
@@ -90,12 +91,21 @@ export default function PrincipalInput({
       
       <div style={{ width: '100%' }}>
         {initialImageUrl && images.length === 0 ? (
-          <div className="ui-thumb" style={{ height: 120, marginBottom: '12px' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={initialImageUrl} 
-              alt="기존 이미지" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          <div className="ui-thumb" style={{ height: 120, marginBottom: '12px', position: 'relative' }}>
+            <Image
+              fill
+              src={(function toThumb(url: string){
+                try {
+                  const pub = '/storage/v1/object/public/';
+                  const sign = '/storage/v1/object/sign/';
+                  if (url.includes(pub)) return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + (url.includes('?') ? '&width=800&quality=80' : '?width=800&quality=80');
+                  if (url.includes(sign)) return url.replace('/storage/v1/object/sign/', '/storage/v1/render/image/sign/') + (url.includes('?') ? '&width=800&quality=80' : '?width=800&quality=80');
+                  return url;
+                } catch { return url; }
+              })(initialImageUrl)}
+              alt="기존 이미지"
+              sizes="(max-width: 640px) 100vw, 800px"
+              style={{ objectFit: 'cover' }}
             />
           </div>
         ) : null}

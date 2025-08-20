@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export interface PersonCardProps {
   year: string | number;
@@ -8,9 +9,30 @@ export interface PersonCardProps {
   name: string;
   className?: string;
   onClick?: () => void;
+  priority?: boolean;
 }
 
-export default function PersonCard({ year, imageUrl, name, className, onClick }: PersonCardProps) {
+export default function PersonCard({ year, imageUrl, name, className, onClick, priority }: PersonCardProps) {
+  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 600, quality: number = 80): string | null {
+    if (!originalUrl) return null;
+    try {
+      const publicToken = '/storage/v1/object/public/';
+      const signToken = '/storage/v1/object/sign/';
+      if (originalUrl.includes(publicToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      if (originalUrl.includes(signToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/sign/', '/storage/v1/render/image/sign/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      return originalUrl;
+    } catch {
+      return originalUrl;
+    }
+  }
   return (
     <div 
       className={`ui-card ${className ?? ''}`} 
@@ -49,16 +71,16 @@ export default function PersonCard({ year, imageUrl, name, className, onClick }:
         }}
       >
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img 
-            src={imageUrl} 
-            alt={name} 
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover' 
-            }} 
-          />
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <Image
+              fill
+              src={toThumbnailUrl(imageUrl, 600, 80) as string}
+              alt={name}
+              sizes="(max-width: 640px) 180px, 240px"
+              style={{ objectFit: 'cover' }}
+              priority={Boolean(priority)}
+            />
+          </div>
         ) : (
           <div 
             style={{ 

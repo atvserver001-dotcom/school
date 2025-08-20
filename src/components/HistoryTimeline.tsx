@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export interface HistoryTimelineItem {
 	id?: string | number;
@@ -25,6 +26,21 @@ function getYear(date: string): string {
 export default function HistoryTimeline({ items, className, onEdit, onDelete }: HistoryTimelineProps) {
 	// 최신 연도가 위로 오도록 정렬 (내림차순)
 	const sorted = [...items].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+
+	function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 70): string | null {
+		if (!originalUrl) return null;
+		try {
+			const supabaseObjectToken = '/storage/v1/object/public/';
+			if (originalUrl.includes(supabaseObjectToken)) {
+				return originalUrl
+					.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+					.concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+			}
+			return originalUrl;
+		} catch {
+			return originalUrl;
+		}
+	}
 
 	let prevYear: string | null = null;
 
@@ -67,8 +83,16 @@ export default function HistoryTimeline({ items, className, onEdit, onDelete }: 
 										</div>
 										{it.content && <div className="ui-timeline-text">{it.content}</div>}
 										{(it.imageUrl ?? (it as any).image_url) && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img src={(it.imageUrl ?? (it as any).image_url) as string} alt={it.title} className="ui-timeline-image" />
+											<div className="ui-timeline-image-wrap">
+												<Image
+													fill
+													src={toThumbnailUrl((it.imageUrl ?? (it as any).image_url) as string) as string}
+													alt={it.title}
+													sizes="(max-width: 640px) 100vw, (max-width: 900px) 80vw, 50vw"
+													style={{ objectFit: 'cover' }}
+													priority={idx < 2}
+												/>
+											</div>
 										)}
 									</div>
 								)}
@@ -107,8 +131,16 @@ export default function HistoryTimeline({ items, className, onEdit, onDelete }: 
 										</div>
 										{it.content && <div className="ui-timeline-text">{it.content}</div>}
 										{(it.imageUrl ?? (it as any).image_url) && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img src={(it.imageUrl ?? (it as any).image_url) as string} alt={it.title} className="ui-timeline-image" />
+											<div className="ui-timeline-image-wrap">
+												<Image
+													fill
+													src={toThumbnailUrl((it.imageUrl ?? (it as any).image_url) as string) as string}
+													alt={it.title}
+													sizes="(max-width: 640px) 100vw, (max-width: 900px) 80vw, 50vw"
+													style={{ objectFit: 'cover' }}
+													priority={idx < 2}
+												/>
+											</div>
 										)}
 									</div>
 								)}

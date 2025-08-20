@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import { ImageCard } from '@/components';
+import Image from 'next/image';
 // 클라이언트에서 직접 Storage로 올리지 않고, 서버 라우트로 업로드해 인증 사용자를 강제합니다.
 
 export default function SchoolInfoSettingsPage() {
@@ -69,7 +70,27 @@ export default function SchoolInfoSettingsPage() {
     })();
   }, []);
 
-   
+  function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 1600, quality: number = 80): string | null {
+    if (!originalUrl) return null;
+    try {
+      const publicToken = '/storage/v1/object/public/';
+      const signToken = '/storage/v1/object/sign/';
+      if (originalUrl.includes(publicToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      if (originalUrl.includes(signToken)) {
+        return originalUrl
+          .replace('/storage/v1/object/sign/', '/storage/v1/render/image/sign/')
+          .concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+      }
+      return originalUrl;
+    } catch {
+      return originalUrl;
+    }
+  }
+  const isBlobOrDataUrl = (url: string) => url.startsWith('blob:') || url.startsWith('data:');
 
   const onSave = async () => {
     if (isSaving) return;
@@ -144,7 +165,7 @@ export default function SchoolInfoSettingsPage() {
           </div>
 
           <div className="ui-col-6">
-            <ImageCard title="교장선생님 사진" imageUrl={principalImageUrl ?? undefined} disabled={!isWriter || isSaving} onSelect={(file) => setPrincipalImage(file)} onPreview={(url) => setPreviewUrl(url)} />
+            <ImageCard title="교장선생님 사진" imageUrl={principalImageUrl ?? undefined} disabled={!isWriter || isSaving} onSelect={(file) => setPrincipalImage(file)} onPreview={(url) => setPreviewUrl(url)} priority />
           </div>
           <div className="ui-col-6">
             <ImageCard title="학교 인사말 이미지" imageUrl={greetingUrl ?? undefined} disabled={!isWriter || isSaving} onSelect={(file) => setGreetingImage(file)} onPreview={(url) => setPreviewUrl(url)} />
@@ -208,14 +229,25 @@ export default function SchoolInfoSettingsPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '92vw', maxHeight: '92vh' }}
+            style={{ width: '92vw', height: '82vh', position: 'relative', borderRadius: 8, overflow: 'hidden' }}
           >
-            <img
-              src={previewUrl}
-              alt="원본 미리보기"
-              style={{ maxWidth: '92vw', maxHeight: '82vh', display: 'block', margin: '0 auto', borderRadius: 8 }}
-            />
-            <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            {(() => {
+              const baseUrl = previewUrl as string;
+              const unopt = isBlobOrDataUrl(baseUrl);
+              const src = unopt ? baseUrl : (toThumbnailUrl(baseUrl, 1920, 85) as string);
+              return (
+                <Image
+                  fill
+                  src={src}
+                  alt="원본 미리보기"
+                  unoptimized={unopt}
+                  sizes="92vw"
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              );
+            })()}
+            <div style={{ position: 'absolute', left: 0, bottom: 12, width: '100%', display: 'flex', justifyContent: 'center', gap: 8 }}>
               <button type="button" className="ui-button primary" onClick={() => setPreviewUrl(null)}>닫기</button>
             </div>
           </div>
