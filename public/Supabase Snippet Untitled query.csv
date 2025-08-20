@@ -1,0 +1,88 @@
+table_name,column_name,data_type
+event_albums,id,uuid
+event_albums,image_url,text
+event_albums,comment,text
+event_albums,date,date
+event_albums,order_num,integer
+event_albums,tag_id,uuid
+event_albums,created_at,timestamp with time zone
+event_albums,updated_at,timestamp with time zone
+graduates,id,uuid
+graduates,year,integer
+graduates,class_number,integer
+graduates,name,text
+graduates,photo_url,text
+graduates,created_at,timestamp with time zone
+graduates,updated_at,timestamp with time zone
+graduation_albums,id,uuid
+graduation_albums,cover_url,text
+graduation_albums,year,integer
+graduation_albums,created_at,timestamp with time zone
+graduation_albums,updated_at,timestamp with time zone
+graduation_classes,id,uuid
+graduation_classes,year,integer
+graduation_classes,class_number,integer
+graduation_classes,homeroom_teacher_name,text
+graduation_classes,homeroom_teacher_photo_url,text
+graduation_classes,group_photo_url,text
+graduation_classes,created_at,timestamp with time zone
+graduation_classes,updated_at,timestamp with time zone
+histories,id,uuid
+histories,title,text
+histories,content,text
+histories,image_url,text
+histories,date,date
+histories,created_at,timestamp with time zone
+histories,updated_at,timestamp with time zone
+principals,id,uuid
+principals,name,text
+principals,year,integer
+principals,photo_url,text
+principals,created_at,timestamp with time zone
+principals,updated_at,timestamp with time zone
+school_details,id,uuid
+school_details,principal_name,text
+school_details,principal_image_url,text
+school_details,greeting_url,text
+school_details,school_logo_url,text
+school_details,motto_url,text
+school_details,school_flower_url,text
+school_details,school_tree_url,text
+school_details,anthem_sheet_url,text
+school_details,founding_date,date
+school_details,created_at,timestamp with time zone
+school_details,updated_at,timestamp with time zone
+school_details,anthem_audio_url,text
+school_info,id,uuid
+school_info,school_name,text
+school_info,created_at,timestamp with time zone
+school_info,updated_at,timestamp with time zone
+settings,id,uuid
+settings,background1_url,text
+settings,background2_url,text
+settings,background3_url,text
+settings,created_at,timestamp with time zone
+settings,updated_at,timestamp with time zone
+staff,id,uuid
+staff,year,integer
+staff,position,text
+staff,responsibility,text
+staff,name,text
+staff,photo_url,text
+staff,order_num,integer
+staff,created_at,timestamp with time zone
+staff,updated_at,timestamp with time zone
+tags,id,uuid
+tags,tag_name,text
+tags,order_num,integer
+tags,created_at,timestamp with time zone
+tags,updated_at,timestamp with time zone
+users,id,uuid
+users,login_id,text
+users,password,text
+users,role,text
+users,name,text
+users,email,text
+users,last_login_at,timestamp with time zone
+users,created_at,timestamp with time zone
+users,updated_at,timestamp with time zone
