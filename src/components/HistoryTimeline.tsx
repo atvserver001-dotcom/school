@@ -30,10 +30,16 @@ export default function HistoryTimeline({ items, className, onEdit, onDelete }: 
 	function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 70): string | null {
 		if (!originalUrl) return null;
 		try {
-			const supabaseObjectToken = '/storage/v1/object/public/';
-			if (originalUrl.includes(supabaseObjectToken)) {
+			const publicToken = '/storage/v1/object/public/';
+			const signToken = '/storage/v1/object/sign/';
+			if (originalUrl.includes(publicToken)) {
 				return originalUrl
 					.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+					.concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
+			}
+			if (originalUrl.includes(signToken)) {
+				return originalUrl
+					.replace('/storage/v1/object/sign/', '/storage/v1/render/image/sign/')
 					.concat(originalUrl.includes('?') ? `&width=${width}&quality=${quality}` : `?width=${width}&quality=${quality}`);
 			}
 			return originalUrl;
@@ -91,6 +97,7 @@ export default function HistoryTimeline({ items, className, onEdit, onDelete }: 
 													sizes="(max-width: 640px) 100vw, (max-width: 900px) 80vw, 50vw"
 													style={{ objectFit: 'cover' }}
 													priority={idx < 2}
+													unoptimized={true}
 												/>
 											</div>
 										)}
@@ -139,6 +146,7 @@ export default function HistoryTimeline({ items, className, onEdit, onDelete }: 
 													sizes="(max-width: 640px) 100vw, (max-width: 900px) 80vw, 50vw"
 													style={{ objectFit: 'cover' }}
 													priority={idx < 2}
+													unoptimized={true}
 												/>
 											</div>
 										)}

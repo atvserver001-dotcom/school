@@ -76,6 +76,7 @@ export default function PersonCard({ year, imageUrl, name, className, onClick, p
               fill
               src={toThumbnailUrl(imageUrl, 600, 80) as string}
               alt={name}
+              unoptimized={true}
               sizes="(max-width: 640px) 180px, 240px"
               style={{ objectFit: 'cover' }}
               priority={Boolean(priority)}

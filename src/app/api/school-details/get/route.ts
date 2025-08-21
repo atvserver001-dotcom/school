@@ -4,6 +4,7 @@ import type { Database } from '@/types/database.types';
 
 const SINGLETON_ID = '00000000-0000-0000-0000-000000000001';
 const BUCKET = 'school-assets';
+const ENABLE_SIGNING_FOR_PUBLIC = false;
 
 function extractStorageKey(url: string | null): string | null {
   if (!url) return null;
@@ -67,29 +68,40 @@ export async function GET() {
       return signed?.signedUrl ?? null;
     };
 
-    const [
-      principal_image_signed,
-      greeting_signed,
-      school_logo_signed,
-      motto_signed,
-      flower_signed,
-      tree_signed,
-      anthem_sheet_signed,
-      anthem_audio_signed,
-    ] = await Promise.all([
-      signOne(keys.principal_image_url),
-      signOne(keys.greeting_url),
-      signOne(keys.school_logo_url),
-      signOne(keys.motto_url),
-      signOne(keys.school_flower_url),
-      signOne(keys.school_tree_url),
-      signOne(keys.anthem_sheet_url),
-      signOne(keys.anthem_audio_url),
-    ]);
+    let signed:
+      | {
+          principal_image_url: string | null;
+          greeting_url: string | null;
+          school_logo_url: string | null;
+          motto_url: string | null;
+          school_flower_url: string | null;
+          school_tree_url: string | null;
+          anthem_sheet_url: string | null;
+          anthem_audio_url: string | null;
+        }
+      | undefined;
 
-    return NextResponse.json({
-      row,
-      signed: {
+    if (ENABLE_SIGNING_FOR_PUBLIC) {
+      const [
+        principal_image_signed,
+        greeting_signed,
+        school_logo_signed,
+        motto_signed,
+        flower_signed,
+        tree_signed,
+        anthem_sheet_signed,
+        anthem_audio_signed,
+      ] = await Promise.all([
+        signOne(keys.principal_image_url),
+        signOne(keys.greeting_url),
+        signOne(keys.school_logo_url),
+        signOne(keys.motto_url),
+        signOne(keys.school_flower_url),
+        signOne(keys.school_tree_url),
+        signOne(keys.anthem_sheet_url),
+        signOne(keys.anthem_audio_url),
+      ]);
+      signed = {
         principal_image_url: principal_image_signed,
         greeting_url: greeting_signed,
         school_logo_url: school_logo_signed,
@@ -98,8 +110,20 @@ export async function GET() {
         school_tree_url: tree_signed,
         anthem_sheet_url: anthem_sheet_signed,
         anthem_audio_url: anthem_audio_signed,
+      };
+    }
+
+    return NextResponse.json(
+      {
+        row,
+        signed,
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (e: any) {
     return NextResponse.json({ row: null, message: e?.message ?? '서버 오류' }, { status: 500 });
   }

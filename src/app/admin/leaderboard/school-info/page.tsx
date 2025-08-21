@@ -49,7 +49,7 @@ export default function SchoolInfoSettingsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/school-details/get', { cache: 'no-store' });
+        const res = await fetch('/api/school-details/get');
         if (!res.ok) return;
         const { row, signed } = await res.json();
         if (!row) return;
@@ -240,7 +240,7 @@ export default function SchoolInfoSettingsPage() {
                   fill
                   src={src}
                   alt="원본 미리보기"
-                  unoptimized={unopt}
+                  unoptimized={true}
                   sizes="92vw"
                   style={{ objectFit: 'contain' }}
                   priority

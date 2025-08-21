@@ -117,7 +117,7 @@ export default function ImageCard({ title, imageUrl, disabled, accept = 'image/*
                   fill
                   src={src}
                   alt={title}
-                  unoptimized={unopt}
+                  unoptimized={true}
                   sizes="(max-width: 640px) 100vw, (max-width: 1120px) 50vw, 33vw"
                   style={{ objectFit: 'contain' }}
                   priority={priority}

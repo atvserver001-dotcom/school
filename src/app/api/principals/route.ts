@@ -35,29 +35,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch principals' }, { status: 500 });
     }
 
-    // 이미지 URL을 서명 URL로 변환 (버킷이 비공개여도 접근 가능하도록)
-    const items = Array.isArray(data)
-      ? await Promise.all(
-          data.map(async (row: any) => {
-            const originalUrl: string | null = row.image_url ?? null;
-            if (!originalUrl) return row;
-            try {
-              let objectPath: string | null = extractObjectPathFromUrl(originalUrl);
-              if (!objectPath) return row;
-              const { data: signed, error: signErr } = await supabaseAdmin
-                .storage
-                .from(BUCKET)
-                .createSignedUrl(objectPath, 60 * 60); // 1시간
-              if (signErr || !signed?.signedUrl) return row;
-              return { ...row, image_url: signed.signedUrl };
-            } catch {
-              return row;
-            }
-          })
-        )
-      : [];
+    // 공개 버킷 기준: DB에는 퍼블릭 URL을 저장하고 그대로 반환 (서명 생략)
+    const items = Array.isArray(data) ? data : [];
 
-    return NextResponse.json({ data: items });
+    return NextResponse.json(
+      { data: items },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (error) {
     console.error('Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -124,19 +112,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create principal' }, { status: 500 });
     }
 
-    // 응답 시에도 서명 URL로 바꿔서 반환
-    let responseRow: any = data;
-    if (responseRow?.image_url) {
-      const objectPath = extractObjectPathFromUrl(responseRow.image_url);
-      if (objectPath) {
-        const { data: signed } = await supabaseAdmin.storage.from(BUCKET).createSignedUrl(objectPath, 60 * 60);
-        if (signed?.signedUrl) {
-          responseRow = { ...responseRow, image_url: signed.signedUrl };
-        }
-      }
-    }
-
-    return NextResponse.json({ data: responseRow }, { status: 201 });
+    // 공개 버킷 기준: 퍼블릭 URL을 그대로 반환
+    return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
     console.error('Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -216,19 +193,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update principal' }, { status: 500 });
     }
 
-    // 응답 시에도 서명 URL로 반환
-    let responseRow: any = data;
-    if (responseRow?.image_url) {
-      const objectPath = extractObjectPathFromUrl(responseRow.image_url);
-      if (objectPath) {
-        const { data: signed } = await supabaseAdmin.storage.from(BUCKET).createSignedUrl(objectPath, 60 * 60);
-        if (signed?.signedUrl) {
-          responseRow = { ...responseRow, image_url: signed.signedUrl };
-        }
-      }
-    }
-
-    return NextResponse.json({ data: responseRow }, { status: 200 });
+    // 공개 버킷 기준: 퍼블릭 URL을 그대로 반환
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
     console.error('Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
