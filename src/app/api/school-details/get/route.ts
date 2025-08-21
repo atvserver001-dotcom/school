@@ -120,7 +120,8 @@ export async function GET() {
       },
       {
         headers: {
-          'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+          // 즉시 반영을 위해 브라우저 캐시 비활성화, CDN은 짧게 허용
+          'Cache-Control': 'no-store, s-maxage=60',
         },
       }
     );

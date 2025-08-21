@@ -45,29 +45,32 @@ export default function SchoolInfoSettingsPage() {
     })();
   }, []);
 
-  // 초기 데이터 로딩
+  // 초기 데이터 로딩 + 재사용 함수
+  const loadDetails = async () => {
+    try {
+      const res = await fetch('/api/school-details/get', { cache: 'no-store' });
+      if (!res.ok) return;
+      const { row, signed } = await res.json();
+      if (!row) return;
+      setFoundingDate(row.founding_date ?? '');
+      setPrincipalName(row.principal_name ?? '');
+      // 서명 URL이 있으면 우선 사용, 없으면 원본 URL 사용
+      setPrincipalImageUrl(signed?.principal_image_url ?? row.principal_image_url ?? null);
+      setGreetingUrl(signed?.greeting_url ?? row.greeting_url ?? null);
+      setSchoolLogoUrl(signed?.school_logo_url ?? row.school_logo_url ?? null);
+      setMottoUrl(signed?.motto_url ?? row.motto_url ?? null);
+      setFlowerUrl(signed?.school_flower_url ?? row.school_flower_url ?? null);
+      setTreeUrl(signed?.school_tree_url ?? row.school_tree_url ?? null);
+      setAnthemSheetUrl(signed?.anthem_sheet_url ?? row.anthem_sheet_url ?? null);
+      setAnthemAudioUrl(signed?.anthem_audio_url ?? row.anthem_audio_url ?? null);
+    } catch {
+      // noop
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/school-details/get');
-        if (!res.ok) return;
-        const { row, signed } = await res.json();
-        if (!row) return;
-        setFoundingDate(row.founding_date ?? '');
-        setPrincipalName(row.principal_name ?? '');
-        // 서명 URL이 있으면 우선 사용, 없으면 원본 URL 사용
-        setPrincipalImageUrl(signed?.principal_image_url ?? row.principal_image_url ?? null);
-        setGreetingUrl(signed?.greeting_url ?? row.greeting_url ?? null);
-        setSchoolLogoUrl(signed?.school_logo_url ?? row.school_logo_url ?? null);
-        setMottoUrl(signed?.motto_url ?? row.motto_url ?? null);
-        setFlowerUrl(signed?.school_flower_url ?? row.school_flower_url ?? null);
-        setTreeUrl(signed?.school_tree_url ?? row.school_tree_url ?? null);
-        setAnthemSheetUrl(signed?.anthem_sheet_url ?? row.anthem_sheet_url ?? null);
-        setAnthemAudioUrl(signed?.anthem_audio_url ?? row.anthem_audio_url ?? null);
-      } catch {
-        // noop
-      }
-    })();
+    loadDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function toThumbnailUrl(originalUrl: string | null | undefined, width: number = 960, quality: number = 78): string | null {
@@ -123,6 +126,19 @@ export default function SchoolInfoSettingsPage() {
         alert('교장선생님 사진 업로드 URL이 반환되지 않았습니다. 버킷 설정을 확인하세요.');
         return;
       }
+      // 저장 성공 시, 로컬 상태 즉시 갱신
+      if (result?.urls) {
+        if (result.urls.principalImageUrl) setPrincipalImageUrl(result.urls.principalImageUrl);
+        if (result.urls.greetingUrl) setGreetingUrl(result.urls.greetingUrl);
+        if (result.urls.schoolLogoUrl) setSchoolLogoUrl(result.urls.schoolLogoUrl);
+        if (result.urls.mottoUrl) setMottoUrl(result.urls.mottoUrl);
+        if (result.urls.flowerUrl) setFlowerUrl(result.urls.flowerUrl);
+        if (result.urls.treeUrl) setTreeUrl(result.urls.treeUrl);
+        if (result.urls.anthemSheetUrl) setAnthemSheetUrl(result.urls.anthemSheetUrl);
+        if (result.urls.anthemAudioUrl) setAnthemAudioUrl(result.urls.anthemAudioUrl);
+      }
+      // 서버 최신값으로 동기화
+      await loadDetails();
       alert('저장되었습니다.');
     } catch (err: any) {
       alert(`저장 중 오류가 발생했습니다.\n${err?.message ?? err}`);

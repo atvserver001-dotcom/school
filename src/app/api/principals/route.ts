@@ -42,7 +42,8 @@ export async function GET() {
       { data: items },
       {
         headers: {
-          'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+          // 목록은 변동이 잦으므로 브라우저 캐시는 비활성화, CDN은 짧게 허용
+          'Cache-Control': 'no-store, s-maxage=60',
         },
       }
     );

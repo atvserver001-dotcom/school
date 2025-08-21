@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { HistoryInput, HistoryTimeline } from '@/components';
+import type { HistoryTimelineItem } from '@/components';
 
 export default function HistoriesSettingsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -12,7 +13,7 @@ export default function HistoriesSettingsPage() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/histories/list');
+      const res = await fetch('/api/histories/list', { cache: 'no-store' });
       if (!res.ok) throw new Error('목록 조회 실패');
       const data = await res.json();
       const mapped = Array.isArray(data)
@@ -96,11 +97,11 @@ export default function HistoriesSettingsPage() {
         {items.length > 0 ? (
           <HistoryTimeline
             items={items}
-            onEdit={(it) => {
+            onEdit={(it: HistoryTimelineItem) => {
               setEditing({ id: (it.id as any) ?? '', date: it.date, title: it.title, content: it.content ?? '', imageUrl: (it as any).imageUrl ?? (it as any).image_url ?? null });
               setIsAddModalOpen(true);
             }}
-            onDelete={(it) => handleDelete(it.id as any)}
+            onDelete={(it: HistoryTimelineItem) => handleDelete(it.id as any)}
           />
         ) : (
           !loading && <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: 24 }}>저장된 연혁이 없습니다. 좌측 상단의 버튼으로 추가하세요.</div>

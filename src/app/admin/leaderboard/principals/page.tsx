@@ -22,7 +22,7 @@ export default function PrincipalsSettingsPage() {
   // 교장 목록 불러오기
   const fetchPrincipals = async () => {
     try {
-      const response = await fetch('/api/principals');
+      const response = await fetch('/api/principals', { cache: 'no-store' });
       if (response.ok) {
         const result = await response.json();
         const items = (result.data || []) as Principal[];
